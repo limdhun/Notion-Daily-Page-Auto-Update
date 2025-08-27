@@ -1,0 +1,20 @@
+name: Notion Daily Page
+
+on:
+  schedule:
+    - cron: "0 22 * * *"   # 매일 07:00 KST (= 전날 22:00 UTC)
+  workflow_dispatch:
+
+jobs:
+  create_page:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm i @notionhq/client
+      - name: Run script
+        run: node create_todo.js
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
