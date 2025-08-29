@@ -2,19 +2,28 @@ name: Notion Daily Page
 
 on:
   schedule:
-    - cron: "0 22 * * *"   # 매일 07:00 KST (= 전날 22:00 UTC)
+    - cron: "0 22 * * *"   # KST 07:00
   workflow_dispatch:
 
 jobs:
   create_page:
     runs-on: ubuntu-latest
+    env:
+      NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+      NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+      NOTION_SOURCE_PAGE_ID: ${{ secrets.NOTION_SOURCE_PAGE_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
+
+      # 선택: 시크릿 존재 확인
+      - name: Sanity check
+        run: |
+          [ -n "$NOTION_TOKEN" ] || (echo "NOTION_TOKEN missing"; exit 1)
+          [ -n "$NOTION_DATABASE_ID" ] || (echo "NOTION_DATABASE_ID missing"; exit 1)
+          [ -n "$NOTION_SOURCE_PAGE_ID" ] || (echo "NOTION_SOURCE_PAGE_ID missing"; exit 1)
+
       - run: npm i @notionhq/client
       - name: Run script
         run: node create_todo.js
-        env:
-          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
